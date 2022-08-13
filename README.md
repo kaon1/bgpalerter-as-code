@@ -1,4 +1,4 @@
-![](docs/bgpalerter-terraform-front image.png)
+![](docs/bgpalerter-terraform-front_image.png)
 # bgpalerter as code
 **[BGPAlerter](https://github.com/nttgin/BGPalerter)** is a well-engineered and useful tool built by [Massimo Candela](https://github.com/massimocandela) which allows you to monitor,
 in real-time, important BGP updates to your desired list of Prefixes and ASNs on the public internet. 
