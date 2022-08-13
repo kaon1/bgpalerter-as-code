@@ -1,0 +1,39 @@
+1.1.1.0/23:
+  description: ABCDEFG
+  asn:
+    - 111111
+  ignoreMorespecifics: false
+  ignore: false
+  group: noc
+2.2.2.0/24:
+  description: HIJKLMNOP
+  asn:
+    - 22222
+  ignoreMorespecifics: false
+  ignore: false
+  group: noc
+3.3.3.0/21:
+  description: QRSTUVWXYZ
+  asn:
+    - 33333
+  ignoreMorespecifics: false
+  ignore: false
+  group: noc
+options:
+  monitorASns:
+    '111111':
+      group: noc
+      upstreams:
+        - 55555
+      downstreams: []
+  generate:
+    asnList:
+      - '111111'
+      - '22222'
+      - '33333'
+    exclude: []
+    excludeDelegated: false
+    prefixes: null
+    monitoredASes: true
+    historical: true
+    group: noc

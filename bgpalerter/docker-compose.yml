@@ -1,0 +1,8 @@
+#version: "3"
+#services:
+#    bgpalerter:
+#        image: bgpalerter
+#        ports:
+#            - '8011:8011'
+##        command: run serve -- --d /opt/bgpalerter/volume/
+#        entrypoint: /bin/sh /opt/bgpalerter/volume/bgp-slack.sh

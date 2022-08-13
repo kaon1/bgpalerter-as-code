@@ -1,0 +1,78 @@
+---
+### First pipeline creates the docker image from Dockerfile and pushes to your ECR repo
+kind: pipeline
+name: ecr
+
+workspace:
+ path: XXX
+
+steps:
+### Drone pushes to ECR/bgpalerter and tags as latest + adds commit_sha
+### The commit_sha is important because its how we force Fargate to always rebuild/redeploy the container on changes
+ - name: publish-image-local
+   image: plugins/ecr
+   settings:
+     registry: xxx.dkr.ecr.us-east-1.amazonaws.com
+     repo: bgpalerter
+     dockerfile: Dockerfile
+     tag:
+       - latest-${DRONE_COMMIT_SHA}
+       
+   environment:
+     SHARED_CREDENTIALS_FILE: XXX
+### When main changes, drone runs this pipeline
+   when:
+     event: push
+     branch: main
+
+---
+### The 2nd drone pipeline runs terraform code to build aws infrastructure
+kind: pipeline
+name: default
+
+workspace:
+ path: XXX
+
+steps:
+### Format syntax check terraform files
+ - name: fmt-module
+   image: hashicorp/terraform
+   commands:
+     - cd terraform/modules/fargate-infra
+     - terraform fmt -check -diff=true
+
+ - name: fmt-aws
+   image: hashicorp/terraform
+   commands:
+     - cd terraform/aws
+     - terraform fmt -check -diff=true
+### Build terraform plan file and sleep30 seconds. Giving admin time to abort
+ - name: prd-terraform-plan
+   image: hashicorp/terraform
+   commands:
+     - cd terraform/aws
+     - terraform init -input=false
+     - terraform plan -out=PLANFILE -input=false -lock-timeout=5m
+     - sleep 30
+   environment:
+     SHARED_CREDENTIALS_FILE: XXX
+### Pass commit_sha so we can use it in terraform file to call our docker image
+     TF_VAR_image_tag_digest: ${DRONE_COMMIT_SHA}
+   when:
+     event: push
+     branch: main
+
+### Deploy infra with terraform apply
+ - name: prd-terraform-apply
+   image: hashicorp/terraform
+   commands:
+     - cd terraform/aws
+     - terraform apply -input=false -lock-timeout=5m PLANFILE
+   environment:
+     SHARED_CREDENTIALS_FILE: XXX
+### Pass commit_sha so we can use it in terraform file to call our docker image
+     TF_VAR_image_tag_digest: ${DRONE_COMMIT_SHA}
+### When main changes, drone runs this pipeline
+   when:
+     event: push
+     branch: main
